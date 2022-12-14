@@ -2,14 +2,12 @@ package groupId.artifactId.service;
 
 import groupId.artifactId.dao.api.ICompletedOrderDao;
 import groupId.artifactId.dao.entity.CompletedOrder;
-import groupId.artifactId.exceptions.NoContentException;
 import groupId.artifactId.service.api.ICompletedOrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 
 @Service
 public class CompletedOrderService implements ICompletedOrderService {
@@ -28,11 +26,7 @@ public class CompletedOrderService implements ICompletedOrderService {
     @Override
     @Transactional(readOnly = true)
     public CompletedOrder findCompletedOrderByTicketId(Long id) {
-        try {
-            return this.completedOrderDao.findCompletedOrderByTicket_Id(id).orElseThrow();
-        } catch (NoSuchElementException e) {
-            throw new NoContentException(e.getMessage());
-        }
+        return this.completedOrderDao.findCompletedOrderByTicket_Id(id).orElseThrow();
     }
 
     @Override
@@ -52,10 +46,6 @@ public class CompletedOrderService implements ICompletedOrderService {
     @Override
     @Transactional(readOnly = true)
     public CompletedOrder get(Long id) {
-        try {
-            return this.completedOrderDao.findById(id).orElseThrow();
-        } catch (NoSuchElementException e) {
-            throw new NoContentException(e.getMessage());
-        }
+        return this.completedOrderDao.findById(id).orElseThrow();
     }
 }
