@@ -4,7 +4,6 @@ import groupId.artifactId.dao.api.IMenuItemDao;
 import groupId.artifactId.dao.entity.Menu;
 import groupId.artifactId.dao.entity.MenuItem;
 import groupId.artifactId.dao.entity.PizzaInfo;
-import groupId.artifactId.exceptions.NoContentException;
 import groupId.artifactId.service.api.IMenuItemService;
 import groupId.artifactId.service.api.IMenuService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +12,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.OptimisticLockException;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Objects;
 
 @Service
@@ -71,18 +69,14 @@ public class MenuItemService implements IMenuItemService {
     @Override
     @Transactional
     public MenuItem updateInTransaction(MenuItem menuItem, Long menuId, Long id, Integer version) {
-        try {
-            MenuItem savedMenuItem = this.update(menuItem, id, version);
-            if (menuId != null) {
-                Menu menu = menuService.get(menuId);
-                List<MenuItem> items = menuService.updateItem(menu, savedMenuItem).getItems();
-                return Objects.requireNonNull(items.stream()
-                        .filter((i) -> i.getId().equals(id)).findFirst().orElseThrow());
-            } else {
-                return savedMenuItem;
-            }
-        } catch (NoSuchElementException e) {
-            throw new NoContentException(e.getMessage());
+        MenuItem savedMenuItem = this.update(menuItem, id, version);
+        if (menuId != null) {
+            Menu menu = menuService.get(menuId);
+            List<MenuItem> items = menuService.updateItem(menu, savedMenuItem).getItems();
+            return Objects.requireNonNull(items.stream()
+                    .filter((i) -> i.getId().equals(id)).findFirst().orElseThrow());
+        } else {
+            return savedMenuItem;
         }
     }
 
@@ -93,11 +87,7 @@ public class MenuItemService implements IMenuItemService {
 
     @Override
     public MenuItem get(Long id) {
-        try {
-            return this.menuItemDao.findById(id).orElseThrow();
-        } catch (NoSuchElementException e) {
-            throw new NoContentException(e.getMessage());
-        }
+        return this.menuItemDao.findById(id).orElseThrow();
     }
 
     @Override

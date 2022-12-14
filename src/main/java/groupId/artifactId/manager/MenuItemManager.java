@@ -4,15 +4,11 @@ import groupId.artifactId.core.dto.input.MenuItemDtoInput;
 import groupId.artifactId.core.dto.output.MenuItemDtoOutput;
 import groupId.artifactId.core.mapper.MenuItemMapper;
 import groupId.artifactId.dao.entity.MenuItem;
-import groupId.artifactId.exceptions.NoContentException;
-import groupId.artifactId.exceptions.ServiceException;
 import groupId.artifactId.manager.api.IMenuItemManager;
 import groupId.artifactId.service.api.IMenuItemService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
 
-import javax.persistence.OptimisticLockException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -30,66 +26,30 @@ public class MenuItemManager implements IMenuItemManager {
 
     @Override
     public MenuItemDtoOutput save(MenuItemDtoInput menuItemDtoInput) {
-        try {
-            MenuItem menuItem = this.menuItemService.saveInTransaction(menuItemMapper.inputMapping(menuItemDtoInput),
-                    menuItemDtoInput.getMenuId());
-            return menuItemMapper.outputMapping(menuItem);
-        } catch (DataIntegrityViolationException e) {
-            throw new NoContentException("menu_item table insert failed,  check preconditions and FK values");
-        } catch (NoContentException e) {
-            throw new NoContentException(e.getMessage());
-        } catch (Exception e) {
-            throw new ServiceException("Failed to save Menu Item at Service" + menuItemDtoInput + "\tcause:"
-                    + e.getMessage(), e);
-        }
+        MenuItem menuItem = this.menuItemService.saveInTransaction(menuItemMapper.inputMapping(menuItemDtoInput),
+                menuItemDtoInput.getMenuId());
+        return menuItemMapper.outputMapping(menuItem);
     }
 
     @Override
     public List<MenuItemDtoOutput> get() {
-        try {
-            return this.menuItemService.get().stream().map(menuItemMapper::outputMapping)
-                    .collect(Collectors.toList());
-        } catch (Exception e) {
-            throw new ServiceException("Failed to get List of Menu Item`s at Service\tcause" + e.getMessage(), e);
-        }
+        return this.menuItemService.get().stream().map(menuItemMapper::outputMapping).collect(Collectors.toList());
     }
 
     @Override
     public MenuItemDtoOutput get(Long id) {
-        try {
-            return menuItemMapper.outputMapping(this.menuItemService.get(id));
-
-        } catch (Exception e) {
-            throw new ServiceException("Failed to get Menu Item at Service by id" + id + "\tcause" + e.getMessage(), e);
-        }
+        return menuItemMapper.outputMapping(this.menuItemService.get(id));
     }
 
     @Override
     public void delete(Long id) {
-        try {
-            this.menuItemService.delete(id);
-        } catch (NoContentException e) {
-            throw new NoContentException(e.getMessage());
-        } catch (Exception e) {
-            throw new ServiceException("Failed to delete Menu Item with id:" + id, e);
-        }
+        this.menuItemService.delete(id);
     }
 
     @Override
     public MenuItemDtoOutput update(MenuItemDtoInput menuItemDtoInput, Long id, Integer version) {
-        try {
-            MenuItem menuItem = this.menuItemService.updateInTransaction(menuItemMapper.inputMapping(menuItemDtoInput),
-                    menuItemDtoInput.getMenuId(), id, version);
-            return menuItemMapper.outputMapping(menuItem);
-        } catch (DataIntegrityViolationException e) {
-            throw new NoContentException("menu_item table update failed,  check preconditions and FK values");
-        } catch (OptimisticLockException e) {
-            throw new OptimisticLockException(e.getMessage());
-        } catch (NoContentException e) {
-            throw new NoContentException(e.getMessage());
-        } catch (Exception e) {
-            throw new ServiceException("Failed to update Menu Item at Service " + menuItemDtoInput + "by id:" + id
-                    + "\tcause" + e.getMessage(), e);
-        }
+        MenuItem menuItem = this.menuItemService.updateInTransaction(menuItemMapper.inputMapping(menuItemDtoInput),
+                menuItemDtoInput.getMenuId(), id, version);
+        return menuItemMapper.outputMapping(menuItem);
     }
 }
