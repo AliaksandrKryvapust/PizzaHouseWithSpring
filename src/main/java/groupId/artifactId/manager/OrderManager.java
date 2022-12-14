@@ -10,13 +10,10 @@ import groupId.artifactId.dao.entity.MenuItem;
 import groupId.artifactId.dao.entity.Order;
 import groupId.artifactId.dao.entity.SelectedItem;
 import groupId.artifactId.dao.entity.Ticket;
-import groupId.artifactId.exceptions.NoContentException;
-import groupId.artifactId.exceptions.ServiceException;
 import groupId.artifactId.manager.api.IOrderManager;
 import groupId.artifactId.service.api.IMenuItemService;
 import groupId.artifactId.service.api.IOrderService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -40,54 +37,29 @@ public class OrderManager implements IOrderManager {
 
     @Override
     public TicketDtoCrudOutput save(OrderDtoInput orderDtoInput) {
-        try {
-            List<Long> menuItemsId = orderDtoInput.getSelectedItems().stream().map(SelectedItemDtoInput::getMenuItemId)
-                    .collect(Collectors.toList());
-            List<MenuItem> menuItems = this.menuItemService.getListById(menuItemsId);
-            List<SelectedItem> inputSelectedItems = orderDtoInput.getSelectedItems().stream()
-                    .map((i) -> selectedItemMapper.inputMapping(i, menuItems)).collect(Collectors.toList());
-            Order newOrder = Order.builder().selectedItems(inputSelectedItems).build();
-            Ticket ticket = this.orderService.save(Ticket.builder().order(newOrder).build());
-            return ticketMapper.outputCrudMapping(ticket);
-        } catch (NoContentException e) {
-            throw new NoContentException(e.getMessage());
-        } catch (DataIntegrityViolationException e) {
-            throw new NoContentException("order table or order data table save failed, check preconditions and FK values");
-        } catch (Exception e) {
-            throw new ServiceException("Failed to save Order" + orderDtoInput, e);
-        }
+        List<Long> menuItemsId = orderDtoInput.getSelectedItems().stream().map(SelectedItemDtoInput::getMenuItemId)
+                .collect(Collectors.toList());
+        List<MenuItem> menuItems = this.menuItemService.getListById(menuItemsId);
+        List<SelectedItem> inputSelectedItems = orderDtoInput.getSelectedItems().stream()
+                .map((i) -> selectedItemMapper.inputMapping(i, menuItems)).collect(Collectors.toList());
+        Order newOrder = Order.builder().selectedItems(inputSelectedItems).build();
+        Ticket ticket = this.orderService.save(Ticket.builder().order(newOrder).build());
+        return ticketMapper.outputCrudMapping(ticket);
     }
 
     @Override
     public List<TicketDtoCrudOutput> get() {
-        try {
-            return this.orderService.get().stream().map(ticketMapper::outputCrudMapping)
-                    .collect(Collectors.toList());
-        } catch (Exception e) {
-            throw new ServiceException("Failed to get List of Ticket`s at Service", e);
-        }
+        return this.orderService.get().stream().map(ticketMapper::outputCrudMapping).collect(Collectors.toList());
     }
 
     @Override
     public TicketDtoCrudOutput get(Long id) {
-        try {
-            return ticketMapper.outputCrudMapping(this.orderService.get(id));
-        } catch (NoContentException e) {
-            throw new NoContentException(e.getMessage());
-        } catch (Exception e) {
-            throw new ServiceException("Failed to get Ticket at Service by id" + id, e);
-        }
+        return ticketMapper.outputCrudMapping(this.orderService.get(id));
     }
 
     @Override
     public TicketDtoOutput getAllData(Long id) {
-        try {
-            Ticket ticket = this.orderService.get(id);
-            return ticketMapper.outputMapping(ticket);
-        } catch (NoContentException e) {
-            throw new NoContentException(e.getMessage());
-        } catch (Exception e) {
-            throw new ServiceException("Failed to getAll data from Ticket at Service by id" + id, e);
-        }
+        Ticket ticket = this.orderService.get(id);
+        return ticketMapper.outputMapping(ticket);
     }
 }

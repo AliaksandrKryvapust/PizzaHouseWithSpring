@@ -3,7 +3,6 @@ package groupId.artifactId.service;
 import groupId.artifactId.core.dto.input.OrderDataDtoInput;
 import groupId.artifactId.dao.api.ITicketDao;
 import groupId.artifactId.dao.entity.Ticket;
-import groupId.artifactId.exceptions.NoContentException;
 import groupId.artifactId.service.api.IOrderDataService;
 import groupId.artifactId.service.api.IOrderService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +10,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 
 import static groupId.artifactId.core.Constants.ORDER_START_DESCRIPTION;
 
@@ -47,10 +45,6 @@ public class OrderService implements IOrderService {
     @Override
     @Transactional(readOnly = true)
     public Ticket get(Long id) {
-        try {
-            return this.ticketDao.findById(id).orElseThrow();
-        } catch (NoSuchElementException e) {
-            throw new NoContentException(e.getMessage());
-        }
+        return this.ticketDao.findById(id).orElseThrow();
     }
 }
