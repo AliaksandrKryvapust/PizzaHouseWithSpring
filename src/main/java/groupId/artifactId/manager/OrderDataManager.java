@@ -6,13 +6,10 @@ import groupId.artifactId.core.dto.output.crud.OrderDataDtoCrudOutput;
 import groupId.artifactId.core.mapper.OrderDataMapper;
 import groupId.artifactId.dao.entity.OrderData;
 import groupId.artifactId.dao.entity.Ticket;
-import groupId.artifactId.exceptions.NoContentException;
-import groupId.artifactId.exceptions.ServiceException;
 import groupId.artifactId.manager.api.IOrderDataManager;
 import groupId.artifactId.service.api.IOrderDataService;
 import groupId.artifactId.service.api.IOrderService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -34,60 +31,30 @@ public class OrderDataManager implements IOrderDataManager {
 
     @Override
     public OrderDataDtoCrudOutput save(OrderDataDtoInput orderDataDtoInput) {
-        try {
-            Ticket ticket = this.orderService.get(orderDataDtoInput.getTicketId());
-            OrderDataDtoInput orderData = OrderDataDtoInput.builder().ticketId(orderDataDtoInput.getTicketId())
-                    .description(orderDataDtoInput.getDescription()).ticket(ticket).build();
-            OrderData orderDataOutput = this.orderDataService.saveInTransaction(orderData);
-            return orderDataMapper.outputCrudMapping(orderDataOutput);
-        } catch (NoContentException e) {
-            throw new NoContentException(e.getMessage());
-        } catch (DataIntegrityViolationException e) {
-            throw new NoContentException("order stages table save failed, check preconditions and FK values");
-        } catch (Exception e) {
-            throw new ServiceException("Failed to save Order Data" + orderDataDtoInput, e);
-        }
+        Ticket ticket = this.orderService.get(orderDataDtoInput.getTicketId());
+        OrderDataDtoInput orderData = OrderDataDtoInput.builder().ticketId(orderDataDtoInput.getTicketId())
+                .description(orderDataDtoInput.getDescription()).ticket(ticket).build();
+        OrderData orderDataOutput = this.orderDataService.saveInTransaction(orderData);
+        return orderDataMapper.outputCrudMapping(orderDataOutput);
     }
 
     @Override
     public List<OrderDataDtoCrudOutput> get() {
-        try {
-            return this.orderDataService.get().stream().map(orderDataMapper::outputCrudMapping).collect(Collectors.toList());
-        } catch (Exception e) {
-            throw new ServiceException("Failed to get Order Data at Service", e);
-        }
+        return this.orderDataService.get().stream().map(orderDataMapper::outputCrudMapping).collect(Collectors.toList());
     }
 
     @Override
     public OrderDataDtoCrudOutput get(Long id) {
-        try {
-            return orderDataMapper.outputCrudMapping(this.orderDataService.get(id));
-        } catch (NoContentException e) {
-            throw new NoContentException(e.getMessage());
-        } catch (Exception e) {
-            throw new ServiceException("Failed to get Order Data at Service by Ticket id" + id, e);
-        }
+        return orderDataMapper.outputCrudMapping(this.orderDataService.get(id));
     }
 
     @Override
     public OrderDataDtoOutput getAllData(Long id) {
-        try {
-            return orderDataMapper.outputMapping(this.orderDataService.get(id));
-        } catch (NoContentException e) {
-            throw new NoContentException(e.getMessage());
-        } catch (Exception e) {
-            throw new ServiceException("Failed to getAll data from Order Data at Service by id" + id, e);
-        }
+        return orderDataMapper.outputMapping(this.orderDataService.get(id));
     }
 
     @Override
     public OrderDataDtoOutput getOrderDataByTicket(Long id) {
-        try {
-            return orderDataMapper.outputMapping(this.orderDataService.findOrderDataByTicketId(id));
-        } catch (NoContentException e) {
-            throw new NoContentException(e.getMessage());
-        } catch (Exception e) {
-            throw new ServiceException("Failed to getAll data from Order Data at Service by Ticket id" + id, e);
-        }
+        return orderDataMapper.outputMapping(this.orderDataService.findOrderDataByTicketId(id));
     }
 }

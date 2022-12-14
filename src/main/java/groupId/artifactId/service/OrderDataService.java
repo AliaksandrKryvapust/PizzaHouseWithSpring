@@ -6,7 +6,6 @@ import groupId.artifactId.core.mapper.OrderStageMapper;
 import groupId.artifactId.dao.api.IOrderDataDao;
 import groupId.artifactId.dao.entity.OrderData;
 import groupId.artifactId.dao.entity.OrderStage;
-import groupId.artifactId.exceptions.NoContentException;
 import groupId.artifactId.service.api.ICompletedOrderService;
 import groupId.artifactId.service.api.IOrderDataService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 
 import static groupId.artifactId.core.Constants.ORDER_FINISH_DESCRIPTION;
 import static java.util.Collections.singletonList;
@@ -63,11 +61,7 @@ public class OrderDataService implements IOrderDataService {
     @Override
     @Transactional(readOnly = true)
     public OrderData findOrderDataByTicketId(Long id) {
-        try {
-            return this.orderDataDao.findOrderDataByTicket_Id(id).orElseThrow();
-        } catch (NoSuchElementException e) {
-            throw new NoContentException(e.getMessage());
-        }
+        return this.orderDataDao.findOrderDataByTicket_Id(id).orElseThrow();
     }
 
     @Override
@@ -83,10 +77,6 @@ public class OrderDataService implements IOrderDataService {
     @Override
     @Transactional(readOnly = true)
     public OrderData get(Long id) {
-        try {
-            return this.orderDataDao.findById(id).orElseThrow();
-        } catch (NoSuchElementException e) {
-            throw new NoContentException(e.getMessage());
-        }
+        return this.orderDataDao.findById(id).orElseThrow();
     }
 }
