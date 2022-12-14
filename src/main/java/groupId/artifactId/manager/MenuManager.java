@@ -5,15 +5,11 @@ import groupId.artifactId.core.dto.output.MenuDtoOutput;
 import groupId.artifactId.core.dto.output.crud.MenuDtoCrudOutput;
 import groupId.artifactId.core.mapper.MenuMapper;
 import groupId.artifactId.dao.entity.Menu;
-import groupId.artifactId.exceptions.NoContentException;
-import groupId.artifactId.exceptions.ServiceException;
 import groupId.artifactId.manager.api.IMenuManager;
 import groupId.artifactId.service.api.IMenuService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
 
-import javax.persistence.OptimisticLockException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -31,78 +27,35 @@ public class MenuManager implements IMenuManager {
 
     @Override
     public MenuDtoOutput getAllData(Long id) {
-        try {
-            Menu menu = this.menuService.get(id);
-            return menuMapper.outputMapping(menu);
-        } catch (NoContentException e) {
-            throw new NoContentException(e.getMessage());
-        } catch (Exception e) {
-            throw new ServiceException("Failed to get Menu at Service by id" + id + "\tcause" + e.getMessage(), e);
-        }
+        Menu menu = this.menuService.get(id);
+        return menuMapper.outputMapping(menu);
     }
 
     @Override
     public MenuDtoCrudOutput save(MenuDtoInput menuDtoInput) {
-        try {
-            Menu menu = this.menuService.save(menuMapper.inputMapping(menuDtoInput));
-            return menuMapper.outputCrudMapping(menu);
-        } catch (DataIntegrityViolationException e) {
-            throw new NoContentException("menu table save failed, check preconditions and FK values");
-        } catch (NoContentException e) {
-            throw new NoContentException(e.getMessage());
-        } catch (Exception e) {
-            throw new ServiceException("Failed to save Menu at Service" + menuDtoInput + "\tcause:"
-                    + e.getMessage(), e);
-        }
+        Menu menu = this.menuService.save(menuMapper.inputMapping(menuDtoInput));
+        return menuMapper.outputCrudMapping(menu);
     }
 
     @Override
     public List<MenuDtoCrudOutput> get() {
-        try {
-            return this.menuService.get().stream().map(menuMapper::outputCrudMapping)
-                    .collect(Collectors.toList());
-        } catch (Exception e) {
-            throw new ServiceException("Failed to get List of Menu`s at Service\tcause" + e.getMessage(), e);
-        }
+        return this.menuService.get().stream().map(menuMapper::outputCrudMapping).collect(Collectors.toList());
     }
 
     @Override
     public MenuDtoCrudOutput get(Long id) {
-        try {
-            Menu menu = this.menuService.get(id);
-            return menuMapper.outputCrudMapping(menu);
-        } catch (NoContentException e) {
-            throw new NoContentException(e.getMessage());
-        } catch (Exception e) {
-            throw new ServiceException("Failed to get Menu at Service by id" + id + "\tcause" + e.getMessage(), e);
-        }
+        Menu menu = this.menuService.get(id);
+        return menuMapper.outputCrudMapping(menu);
     }
 
     @Override
     public void delete(Long id) {
-        try {
-            this.menuService.delete(id);
-        } catch (NoContentException e) {
-            throw new NoContentException(e.getMessage());
-        } catch (Exception e) {
-            throw new ServiceException("Failed to delete Menu with id:" + id, e);
-        }
+        this.menuService.delete(id);
     }
 
     @Override
     public MenuDtoCrudOutput update(MenuDtoInput menuDtoInput, Long id, Integer version) {
-        try {
-            Menu menu = this.menuService.update(menuMapper.inputMapping(menuDtoInput), id, version);
-            return menuMapper.outputCrudMapping(menu);
-        } catch (javax.persistence.OptimisticLockException e) {
-            throw new OptimisticLockException(e.getMessage());
-        } catch (NoContentException e) {
-            throw new NoContentException(e.getMessage());
-        } catch (DataIntegrityViolationException e) {
-            throw new NoContentException("menu table update failed,  check preconditions and FK values");
-        } catch (Exception e) {
-            throw new ServiceException("Failed to update Menu at Service " + menuDtoInput + "by id:" + id
-                    + "\tcause" + e.getMessage(), e);
-        }
+        Menu menu = this.menuService.update(menuMapper.inputMapping(menuDtoInput), id, version);
+        return menuMapper.outputCrudMapping(menu);
     }
 }
